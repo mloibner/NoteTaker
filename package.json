@@ -1,0 +1,22 @@
+{
+  "name": "notetaker",
+  "version": "1.0.0",
+  "description": "![NPM version](https://img.shields.io/badge/npm-6.14.4-green)   ![GitHub license](https://img.shields.io/badge/License-MITLicense-blue.svg)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mloibner/NoteTaker.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mloibner/NoteTaker/issues"
+  },
+  "homepage": "https://github.com/mloibner/NoteTaker#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
