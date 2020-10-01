@@ -1,81 +1,79 @@
 //Dependencies
-const fs = require("fs");
 const express = require("express");
 const path = require("path");
-const process = require("process");
+const fs = require("fs");
+const { v4: uuidv4 } = require('uuid');
 
-
-//Express App and Port set up
+// Default application settings
 const app = express();
 const PORT = process.env.PORT || 8080;
-
-//Data Parsing Set up
+app.use(express.static('public'));
+const publicPath = __dirname + "/public";
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(express.static('public'));
 
-
-
-// Get Requests
-
-app.get('/notes', (req, res) => {
-    res.sendFile(path.join(__dirname, "./public/notes.html"));
+// Display index page when app is run
+app.get("/", (req, res) => {
+    res.sendFile(path.join(publicPath, "index.html"));
 });
 
+// Display notes pages 
+app.get("/notes", (req, res) => {
+    res.sendFile(path.join(publicPath, "notes.html"));
+});
+
+// Display notes stored in db.json
 app.get("/api/notes", (req, res) => {
-    res.sendFile(path.join(__dirname, "/db/db.json"));
+    return res.json(getData());
 });
 
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, "./public/index.html"))
-});
-
-
-// Post Request
-
+// Post new note into db.json
 app.post("/api/notes", (req, res) => {
-    let savedNotes = JSON.parse(fs.readFileSync("./db/db.json", "utf8"));
-    let newNote = req.body;
-    let newID = (savedNotes.length).toString();
-    newNote.id = newID;
-    savedNotes.push(newNote);
+    // Get entered note and assign a unique id
+    const newNote = req.body;
+    newNote['id'] = uuidv4()
+    // Add new note to db.json
+    let currentNotes = getData()
+    currentNotes.push(newNote)
+    setData(currentNotes);
 
-    fs.writeFileSync("./db/db.json", JSON.stringify(savedNotes));
-    console.log("Note saved to db.json. Content: ", newNote);
-    res.json(savedNotes);
+    return res.status(201).end();
 });
 
-
-//Delete Request
-
-app.get("/api/notes/:id", (req, res) => {
-    let savedNotes = JSON.parse(fs / fs.readFileSync("./db/db.json", "utf8"));
-    res.json(savedNotes[Number(req.params.id)]);
-
-});
-
+// Delete specific note from db.json
 app.delete("/api/notes/:id", (req, res) => {
-    let savedNotes = JSON.parse(fs.readFileSync("./db/db.json", "utf8"));
-    let noteID = req.params.id;
-    let resetID = 0;
-    console.log(`Deleting note - ID: ${noteID}`);
-    savedNotes = savedNotes.filter(currNote => {
-        return currNote.id != noteID;
-    })
+    let currentNotes = getData()
+    // Find index with unique id and splice from array
+    index = currentNotes.findIndex(note => note.id === req.params.id);
+    currentNotes.splice(index, 1)
+    // Set new notes array without the deleted note into db.json
+    setData(currentNotes);
 
-    for (currentNote of savedNotes) {
-        currentNote.id = resetID.toString();
-        resetID++;
-    }
-
-
-    fs.writeFileSync("./db/db.json", JSON.stringify(savedNotes));
-    res.json(savedNotes);
-
+    return res.status(202).end();
 });
 
+// Get notes array from db.json
+const getData = () => {
+    try {
+        const jsonString = fs.readFileSync("./db/db.json")
+        const notes = JSON.parse(jsonString)
+        return notes
+    } catch(err) {
+        throw (err)
+    }
+}
 
-//Listener
+// Add new note to db.json
+const setData = (data) => {
+    try {
+        fs.writeFileSync("./db/db.json", JSON.stringify(data), 'utf8')
+        console.log("Successfully added the note");
+    } catch(err) {
+        throw (err)
+    }
+}
+
+// Start server
 app.listen(PORT, () => {
-    console.log(`App listening on PORT: ${PORT}`);
+    console.log("App listening on PORT " + PORT);
 });
