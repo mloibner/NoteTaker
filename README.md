@@ -15,6 +15,7 @@
           
 ## Usage
 A command line application for a note taker that can be used to write, save, and delete notes. This application uses an express backend and saves and retrieves note data from a JSON file. 
+You can access it here https://shielded-cove-73590.herokuapp.com/
 
 ### Installation Instructions
 To install the application run the following command:
